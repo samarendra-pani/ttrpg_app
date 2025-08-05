@@ -15,6 +15,18 @@ Note: I am using a mix of Co-pilot and Google Gemini for this project to experim
 
 I thought this was a nice project to start learning Rust. The logic is simple. The UI is doable.
 
+## Installation
+
+This can be installed locally using `cargo`, the package manager for Rust. Installation instruction for `cargo` can be found [here](https://doc.rust-lang.org/book/ch01-03-hello-cargo.html).
+
+Installing and running `ttrpg_app`:
+
+```sh
+git clone https://github.com/samarendra-pani/ttrpg_app
+cd ttrpg_app
+cargo run
+```
+
 ## Future Plans
 
 - Thinking of creating a landing page or a side panel where all the different tools can be accessed. Right now there is only one tool.
