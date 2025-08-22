@@ -32,6 +32,7 @@ struct TtrpgApp {
     // List of all sub-apps; 
     // add new apps to this vector to make them available in the UI.
     sub_apps: Vec<Box<dyn TtrpgSubApp>>,
+    sidebar_open: bool, // Tracks whether the sidebar is visible
 }
 
 impl Default for TtrpgApp {
@@ -43,6 +44,7 @@ impl Default for TtrpgApp {
                 Box::new(InitiativeTracker::default()),
                 // Box::new(OtherSubApp::default()),
             ],
+            sidebar_open: false, // Sidebar starts closed
         }
     }
 }
@@ -52,6 +54,7 @@ impl App for TtrpgApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         match self.current_view {
             AppView::LandingPage => {
+                // Sidebar is always shown on the landing page
                 egui::SidePanel::left("sidebar").show(ctx, |ui| {
                     ui.heading("TTRPG Utilities");
                     ui.separator();
@@ -70,15 +73,33 @@ impl App for TtrpgApp {
                 });
             }
             AppView::SubApp(i) => {
-                // Delegate UI to the selected sub-app
-                self.sub_apps[i].update_ui(ctx);
-
-                // Add a "Back" button to return to the landing page
-                egui::TopBottomPanel::bottom("bottom_panel").show(ctx, |ui| {
-                    if ui.button("⬅ Back to Main Menu").clicked() {
-                        self.current_view = AppView::LandingPage;
+                // Add a toggle button in the top panel to open/close the sidebar
+                egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+                    if ui.button(if self.sidebar_open { "Hide Sidebar" } else { "Show Sidebar" }).clicked() {
+                        self.sidebar_open = !self.sidebar_open;
                     }
                 });
+
+                // Conditionally show the sidebar based on the sidebar_open field
+                if self.sidebar_open {
+                    egui::SidePanel::left("subapp_sidebar").show(ctx, |ui| {
+                        ui.heading("TTRPG Utilities");
+                        ui.separator();
+                        ui.label("Applications:");
+
+                        for (j, app) in self.sub_apps.iter().enumerate() {
+                            if ui.button(app.name()).clicked() {
+                                self.current_view = AppView::SubApp(j);
+                            }
+                        }
+                        if ui.button("⬅ Back to Main Menu").clicked() {
+                            self.current_view = AppView::LandingPage;
+                        }
+                    });
+                }
+
+                // Render the selected sub-app's UI in the central panel
+                self.sub_apps[i].update_ui(ctx);
             }
         }
     }
